@@ -49,9 +49,9 @@ export class GoogleDriveService {
    * Delete file on google drive
    * @param fileId file id to delete
    */
-  async deleteFile(fileId: string) {
+  async deleteFile(fileId: string, googleDriveConfigCustom?: GoogleDriveConfigType) {
     try {
-      const drive = this.getDriveService();
+      const drive = this.getDriveService(googleDriveConfigCustom);
 
       await drive.files.delete({
         fileId,

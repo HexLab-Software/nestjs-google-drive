@@ -49,9 +49,9 @@ let GoogleDriveService = class GoogleDriveService {
             throw err;
         }
     }
-    async deleteFile(fileId) {
+    async deleteFile(fileId, googleDriveConfigCustom) {
         try {
-            const drive = this.getDriveService();
+            const drive = this.getDriveService(googleDriveConfigCustom);
             await drive.files.delete({
                 fileId,
             });
