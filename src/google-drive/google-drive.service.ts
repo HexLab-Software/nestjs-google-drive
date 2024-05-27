@@ -17,7 +17,7 @@ export class GoogleDriveService {
    * @param folder folder name
    * @returns
    */
-  async uploadFile(file: Express.Multer.File, folderId?: string) {
+  async uploadFile(file: Express.Multer.File, folderId?: string, googleDriveConfigCustom?: GoogleDriveConfigType) {
     try {
       const fileMetadata = {
         name: file.filename,
@@ -29,7 +29,7 @@ export class GoogleDriveService {
         body: this.bufferToStream(file),
       };
 
-      const driveService = this.getDriveService();
+      const driveService = this.getDriveService(googleDriveConfigCustom);
 
       const response = await driveService.files.create({
         requestBody: fileMetadata,
@@ -91,14 +91,14 @@ export class GoogleDriveService {
    * Ask for permission to access to Goofle Drive
    * @returns
    */
-  private getAuth() {
+  private getAuth(googleDriveConfigCustom?: GoogleDriveConfigType) {
     try {
       const { clientId, clientSecret, redirectUrl, refreshToken } =
         this.googleDriveConfig;
 
       const auth = new google.auth.OAuth2(clientId, clientSecret, redirectUrl);
 
-      auth.setCredentials({ refresh_token: refreshToken });
+      auth.setCredentials({ refresh_token: googleDriveConfigCustom?.refreshToken || refreshToken });
 
       return auth;
     } catch (err) {
@@ -110,8 +110,8 @@ export class GoogleDriveService {
    * Get access to Google Drive
    * @returns
    */
-  private getDriveService = () => {
-    const auth = this.getAuth();
+  private getDriveService = (googleDriveConfigCustom?: GoogleDriveConfigType) => {
+    const auth = this.getAuth(googleDriveConfigCustom);
 
     const DRIVE_VERSION = 'v3';
 
