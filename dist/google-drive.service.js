@@ -20,13 +20,17 @@ const google_drive_constant_1 = require("./google-drive.constant");
 let GoogleDriveService = class GoogleDriveService {
     constructor(googleDriveConfig) {
         this.googleDriveConfig = googleDriveConfig;
-        this.getDriveService = (googleDriveConfigCustom) => {
-            const auth = this.getAuth(googleDriveConfigCustom);
+        this.getDriveService = () => {
+            const auth = this.getAuth();
             const DRIVE_VERSION = 'v3';
             return googleapis_1.google.drive({ version: DRIVE_VERSION, auth });
         };
     }
-    async uploadFile(file, folderId, googleDriveConfigCustom) {
+    setCustomConfig(googleDriveConfigCustom) {
+        this.googleDriveConfigCustom = googleDriveConfigCustom;
+        return this;
+    }
+    async uploadFile(file, folderId) {
         try {
             const fileMetadata = {
                 name: file.filename,
@@ -36,7 +40,7 @@ let GoogleDriveService = class GoogleDriveService {
                 mimeType: file.mimetype,
                 body: this.bufferToStream(file),
             };
-            const driveService = this.getDriveService(googleDriveConfigCustom);
+            const driveService = this.getDriveService();
             const response = await driveService.files.create({
                 requestBody: fileMetadata,
                 media,
@@ -49,9 +53,9 @@ let GoogleDriveService = class GoogleDriveService {
             throw err;
         }
     }
-    async deleteFile(fileId, googleDriveConfigCustom) {
+    async deleteFile(fileId) {
         try {
-            const drive = this.getDriveService(googleDriveConfigCustom);
+            const drive = this.getDriveService();
             await drive.files.delete({
                 fileId,
             });
@@ -76,11 +80,12 @@ let GoogleDriveService = class GoogleDriveService {
         const fileUrl = result.data.webContentLink;
         return fileUrl;
     }
-    getAuth(googleDriveConfigCustom) {
+    getAuth() {
+        var _a, _b;
         try {
             const { clientId, clientSecret, redirectUrl, refreshToken } = this.googleDriveConfig;
-            const auth = new googleapis_1.google.auth.OAuth2(clientId, clientSecret, (googleDriveConfigCustom === null || googleDriveConfigCustom === void 0 ? void 0 : googleDriveConfigCustom.redirectUrl) || redirectUrl);
-            auth.setCredentials({ refresh_token: (googleDriveConfigCustom === null || googleDriveConfigCustom === void 0 ? void 0 : googleDriveConfigCustom.refreshToken) || refreshToken });
+            const auth = new googleapis_1.google.auth.OAuth2(clientId, clientSecret, ((_a = this.googleDriveConfigCustom) === null || _a === void 0 ? void 0 : _a.redirectUrl) || redirectUrl);
+            auth.setCredentials({ refresh_token: ((_b = this.googleDriveConfigCustom) === null || _b === void 0 ? void 0 : _b.refreshToken) || refreshToken });
             return auth;
         }
         catch (err) {

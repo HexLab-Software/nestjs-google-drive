@@ -6,10 +6,23 @@ import { GoogleDriveConfigType } from './types';
 
 @Injectable()
 export class GoogleDriveService {
+
+  private googleDriveConfigCustom: GoogleDriveConfigType | undefined
+
   constructor(
     @Inject(GOOGLE_DRIVE_CONFIG)
     private readonly googleDriveConfig: GoogleDriveConfigType,
   ) {}
+
+  /**
+   * Set custom google drive configuration
+   * @param googleDriveConfigCustom 
+   * @returns 
+   */
+  setCustomConfig(googleDriveConfigCustom: GoogleDriveConfigType): GoogleDriveService{
+    this.googleDriveConfigCustom = googleDriveConfigCustom
+    return this
+  }
 
   /**
    * Upload file to Google Drive
@@ -17,7 +30,7 @@ export class GoogleDriveService {
    * @param folder folder name
    * @returns
    */
-  async uploadFile(file: Express.Multer.File, folderId?: string, googleDriveConfigCustom?: GoogleDriveConfigType) {
+  async uploadFile(file: Express.Multer.File, folderId?: string) {
     try {
       const fileMetadata = {
         name: file.filename,
@@ -29,7 +42,7 @@ export class GoogleDriveService {
         body: this.bufferToStream(file),
       };
 
-      const driveService = this.getDriveService(googleDriveConfigCustom);
+      const driveService = this.getDriveService();
 
       const response = await driveService.files.create({
         requestBody: fileMetadata,
@@ -49,9 +62,9 @@ export class GoogleDriveService {
    * Delete file on google drive
    * @param fileId file id to delete
    */
-  async deleteFile(fileId: string, googleDriveConfigCustom?: GoogleDriveConfigType) {
+  async deleteFile(fileId: string) {
     try {
-      const drive = this.getDriveService(googleDriveConfigCustom);
+      const drive = this.getDriveService();
 
       await drive.files.delete({
         fileId,
@@ -91,14 +104,14 @@ export class GoogleDriveService {
    * Ask for permission to access to Goofle Drive
    * @returns
    */
-  private getAuth(googleDriveConfigCustom?: GoogleDriveConfigType) {
+  private getAuth() {
     try {
       const { clientId, clientSecret, redirectUrl, refreshToken } =
         this.googleDriveConfig;
 
-      const auth = new google.auth.OAuth2(clientId, clientSecret, googleDriveConfigCustom?.redirectUrl || redirectUrl);
+      const auth = new google.auth.OAuth2(clientId, clientSecret, this.googleDriveConfigCustom?.redirectUrl || redirectUrl);
 
-      auth.setCredentials({ refresh_token: googleDriveConfigCustom?.refreshToken || refreshToken });
+      auth.setCredentials({ refresh_token: this.googleDriveConfigCustom?.refreshToken || refreshToken });
 
       return auth;
     } catch (err) {
@@ -110,8 +123,8 @@ export class GoogleDriveService {
    * Get access to Google Drive
    * @returns
    */
-  private getDriveService = (googleDriveConfigCustom?: GoogleDriveConfigType) => {
-    const auth = this.getAuth(googleDriveConfigCustom);
+  private getDriveService = () => {
+    const auth = this.getAuth();
 
     const DRIVE_VERSION = 'v3';
 
