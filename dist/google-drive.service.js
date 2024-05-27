@@ -79,7 +79,7 @@ let GoogleDriveService = class GoogleDriveService {
     getAuth(googleDriveConfigCustom) {
         try {
             const { clientId, clientSecret, redirectUrl, refreshToken } = this.googleDriveConfig;
-            const auth = new googleapis_1.google.auth.OAuth2(clientId, clientSecret, redirectUrl);
+            const auth = new googleapis_1.google.auth.OAuth2(clientId, clientSecret, (googleDriveConfigCustom === null || googleDriveConfigCustom === void 0 ? void 0 : googleDriveConfigCustom.redirectUrl) || redirectUrl);
             auth.setCredentials({ refresh_token: (googleDriveConfigCustom === null || googleDriveConfigCustom === void 0 ? void 0 : googleDriveConfigCustom.refreshToken) || refreshToken });
             return auth;
         }

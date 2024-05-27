@@ -96,7 +96,7 @@ export class GoogleDriveService {
       const { clientId, clientSecret, redirectUrl, refreshToken } =
         this.googleDriveConfig;
 
-      const auth = new google.auth.OAuth2(clientId, clientSecret, redirectUrl);
+      const auth = new google.auth.OAuth2(clientId, clientSecret, googleDriveConfigCustom?.redirectUrl || redirectUrl);
 
       auth.setCredentials({ refresh_token: googleDriveConfigCustom?.refreshToken || refreshToken });
 
